@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Messages
+log () {
+  printf '%s [%s] %s\n' "$(date '+%Y/%m/%d %H:%M:%S')" "$1" "${@:2}"
+}
+info () {
+  if [ -t 1 ]; then
+    printf '\e[1;33m%-15s\e[m%-30s%s\n' 'Info:' "$1" "${@:2}"
+  else log INFO "$*"; fi
+}
+fail () {
+  if [ -t 1 ]; then
+    >&2 printf '\n\e[1;31m%-10s\e[m%s\n' 'Error:' "$*"; exit 1
+  else log ERROR "$*"; exit 1; fi
+}
+warn () {
+  if [ -t 1 ]; then
+    >&2 printf '\e[1;31m%-10s\e[m%s\n' 'Warning:' "$*"
+  else log WARNING "$*"; fi
+}
+
+
+#Set vars
+kafka_connect_host="${kafka_connect_host:-$KAFKA_CONNECT_HOST}"
+kafka_connect_port="${kafka_connect_port:-$KAFKA_CONNECT_PORT}"
+
+
+#Print vars
+info KAFKA_CONNECT_HOST="$kafka_connect_host"
+info KAFKA_CONNECT_PORT="$kafka_connect_port"
+
+
+
+connectorsjson=$(
+  curl -s "http://$kafka_connect_host:$kafka_connect_port/connectors?expand=status"
+) 
+
+status=$?
+if [ $status -eq 0 ]
+then
+
+  # List current connectors and status
+  echo connectorsjson | \ 
+    jq -c -M 'map({name: .status.name } +  {tasks: .status.tasks}) | .[] | {task: ((.tasks[]) + {name: .name})} | select(.task.state=="FAILED") | {name: .task.name, task_id: .task.id|tostring} | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")' | \
+    xargs -I{connector_and_task} curl -v -X POST "http://$kafka_connect_host:$kafka_connect_port"\{connector_and_task\}
+
+else
+  fail 'Connect to API Kafka Connect' \
+   http://$kafka_connect_host:$kafka_connect_port \
+   'failed with status code' $status
+fi
