@@ -21,6 +21,8 @@ Required dependencies:
 ```yaml
 KAFKA_CONNECT_HOST=localhost
 KAFKA_CONNECT_PORT=8083
+REQUEST_DELAY=30
+REQUEST_TIMEOUT=5
 ```
 
 ## Plans for the future
