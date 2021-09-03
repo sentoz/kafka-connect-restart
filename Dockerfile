@@ -4,10 +4,10 @@ ARG JQ_VERSION="1.6"
 
 LABEL maintainer="sentoz66@gmail.com"
 
+ENV SIDECAR_MODE=false
 ENV KAFKA_CONNECT_HOST=localhost
 ENV KAFKA_CONNECT_PORT=8083
 ENV REQUEST_DELAY=30
-ENV REQUEST_TIMEOUT=5
 
 RUN apk add --update --no-cache \
     bash curl sort && \

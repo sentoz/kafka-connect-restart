@@ -22,12 +22,8 @@ Required dependencies:
 KAFKA_CONNECT_HOST=localhost
 KAFKA_CONNECT_PORT=8083
 REQUEST_DELAY=30
-REQUEST_TIMEOUT=5
+SIDECAR_MODE=false
 ```
-
-## Plans for the future
-
-* implement the ability to work as a sidecar as a container
 
 <!--
 Title: Kafka Connectors Restarte
