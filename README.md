@@ -1,13 +1,23 @@
 # Kafka Connectors Restarter <!-- omit in toc -->
 
 * [Description](#description)
+* [Quick Start Guides](#quick-start-guides)
 * [Dependencies](#dependencies)
 * [Environment variables](#environment-variables)
-* [Plans for the future](#plans-for-the-future)
 
 ## Description
 
-Container for creating a cronjob, which, through the kafka connect API, checks the state of the connector and restarts it if necessary
+A container that, through the kafka connect API, checks the state of the connector and, if necessary, restarts it.
+
+Supports work in two modes:  
+
+* cron job
+* sidecar
+
+## Quick Start Guides
+
+* [Run in kubernetes as a cron job](docs/cronjob.md)
+* [Run in kubernetes as a sidecar container](docs/sidecar.md)
 
 ## Dependencies
 
