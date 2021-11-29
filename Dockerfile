@@ -10,9 +10,10 @@ ENV KAFKA_CONNECT_PORT=8083
 ENV REQUEST_DELAY=30
 
 RUN apk add --update --no-cache \
-    bash curl sort && \
+    bash curl util-linux && \
     curl -sLo /usr/bin/jq \
-    "https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/jq-linux64"
+    "https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/jq-linux64" && \
+    chmod +x /usr/bin/jq
 
 COPY ./connector-restart /connector-restart
 
