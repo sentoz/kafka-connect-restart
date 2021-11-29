@@ -15,4 +15,4 @@ RUN apk add --update --no-cache \
 
 COPY ./connector-restart /connector-restart
 
-ENDPOINT ["/connector-restart"]
+ENTRYPOINT ["/connector-restart"]
