@@ -46,15 +46,29 @@ then
         curl -Lffs "http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT/connectors?expand=status"
         )
       then
-        info 'Status connectors already'
+        info 'Status connectors already' 
+        info ':|:Name:|:State_connector:|:State tasks:|:'
         # List current connectors and status
-        echo $connectorsjson | \
-          jq '. | to_entries[] | [ .value.info.type, .key, .value.status.connector.state,.value.status.tasks[].state,.value.info.config."connector.class"]|join(":|:")' | \
-          column -s : -t| sed 's/\"//g'
+        aray_current_states=$(echo $connectorsjson | \
+          jq '. | to_entries[] | [ .value.info.type, .key, .value.status.connector.state,.value.status.tasks[].state,.value.info.config."connector.class"]|join(":|:")'
+          )
+        for current_state in $aray_current_states
+          do
+            info "$current_state"
+          done
         # Restart any connector tasks that are FAILED
         echo $connectorsjson | \
           jq -c -M 'map({name: .status.name } +  {tasks: .status.tasks}) | .[] | {task: ((.tasks[]) + {name: .name})} | select(.task.state=="FAILED") | {name: .task.name, task_id: .task.id|tostring} | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")' | \
           xargs -I{connector_and_task} curl -v -X POST "http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"\{connector_and_task\}
+        # log restart connectors
+        aray_failed_tasks=$(echo $connectorsjson | \
+          jq -c -M 'map({name: .status.name } +  {tasks: .status.tasks}) | .[] | {task: ((.tasks[]) + {name: .name})} | select(.task.state=="FAILED") | {name: .task.name, task_id: .task.id|tostring} | ("Connector: " + .name + " | Tasks: " + .task_id + " - RESTART")' | \
+          xargs -I{connectors} printf \{connectors\}
+          )
+        for failed_task in $aray_failed_tasks
+          do
+            info "$failed_task"
+          done
       else
         fail 'Connect to API Kafka Connect' \
         http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT \
