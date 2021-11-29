@@ -36,18 +36,23 @@ info REQUEST_DELAY="$REQUEST_DELAY"
 
 if [ "$SIDECAR_MODE" = true ]
 then
+  #wait start kafka-connect
+  info 'Wait start kafka-connect 60 second'
+  sleep 60s
   while true 
-    do 
+    do
+      info 'Get status connectors' 
       if connectorsjson=$(
-        curl -Lff "http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT/connectors?expand=status"
+        curl -Lffs "http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT/connectors?expand=status"
         )
       then
+        info 'Status connectors already'
         # List current connectors and status
-        echo connectorsjson | \
+        echo $connectorsjson | \
           jq '. | to_entries[] | [ .value.info.type, .key, .value.status.connector.state,.value.status.tasks[].state,.value.info.config."connector.class"]|join(":|:")' | \
-          column -s : -t| sed 's/\"//g'| sort
+          column -s : -t| sed 's/\"//g'
         # Restart any connector tasks that are FAILED
-        echo connectorsjson | \
+        echo $connectorsjson | \
           jq -c -M 'map({name: .status.name } +  {tasks: .status.tasks}) | .[] | {task: ((.tasks[]) + {name: .name})} | select(.task.state=="FAILED") | {name: .task.name, task_id: .task.id|tostring} | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")' | \
           xargs -I{connector_and_task} curl -v -X POST "http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"\{connector_and_task\}
       else
@@ -55,6 +60,7 @@ then
         http://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT \
         'failed with status code' $? 'and message' $connectorsjson
       fi
+      info 'Wait next check after' $REQUEST_DELAY 'minut(s)'
       sleep "$REQUEST_DELAY"m
     done
 else
