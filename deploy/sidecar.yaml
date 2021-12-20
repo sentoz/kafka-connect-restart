@@ -28,6 +28,8 @@
             value: localhost
           - name: KAFKA_CONNECT_PORT
             value: "8083"
+          - name: KAFKA_CONNECT_PROTO
+            value: 'http'
           - name: REQUEST_DELAY
             value: "30"
           - name: SIDECAR_MODE

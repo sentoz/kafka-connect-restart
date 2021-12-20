@@ -28,6 +28,8 @@
                     value: 'kafka-connect'
                   - name: KAFKA_CONNECT_PORT
                     value: '8083'
+                  - name: KAFKA_CONNECT_PROTO
+                    value: 'http'
                   - name: SIDECAR_MODE
                     value: 'false'
               restartPolicy: OnFailure

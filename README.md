@@ -31,6 +31,7 @@ Required dependencies:
 ```yaml
 KAFKA_CONNECT_HOST=localhost
 KAFKA_CONNECT_PORT=8083
+KAFKA_CONNECT_PROTO=http
 REQUEST_DELAY=30
 SIDECAR_MODE=false
 ```
