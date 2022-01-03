@@ -2,6 +2,7 @@
 
 * [Description](#description)
 * [Quick Start Guides](#quick-start-guides)
+* [Container image](#container-image)
 * [Dependencies](#dependencies)
 * [Environment variables](#environment-variables)
 
@@ -19,6 +20,13 @@ Supports work in two modes:
 * [Run in kubernetes as a cron job](docs/cronjob.md)
 * [Run in kubernetes as a sidecar container](docs/sidecar.md)
 
+## Container image
+
+You can pull image from registries:
+
+* `ghcr.io/sentoz/kafka-connect-restart:0.7.0`
+* `quay.io/sentoz/kafka-connect-restart:0.7.0`
+* `docker.io/sentoz/kafka-connect-restart:0.7.0`
 ## Dependencies
 
 Required dependencies:
