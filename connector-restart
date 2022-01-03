@@ -98,6 +98,16 @@ if [ "$SIDECAR_MODE" = true ]; then
 
       log info "${aray_current_states[*]}"
 
+      # Restart any connectors that are FAILED
+      jq -erc -M '
+        map({name: .status.name} + {connector: .status.connector}) 
+        | .[]| {connect: ((.connector) + {name: .name})}
+        | select(.connect.state=="FAILED") 
+        | ("/connectors/"+ .connect.name + "/restart")
+      ' <<<"$connectorsjson" |
+        xargs -I{connectors} \
+          curl -v -X POST "$_connect_url"\{connectors\}
+
       # Restart any connector tasks that are FAILED
       jq -erc -M '
         map({name: .status.name } + {tasks: .status.tasks})
@@ -135,8 +145,17 @@ if [ "$SIDECAR_MODE" = true ]; then
 else
 
   if connectorsjson=$(get_connectors); then
+    # Restart any connectors that are FAILED
+    jq -erc -M '
+      map({name: .status.name} + {connector: .status.connector}) 
+      | .[]| {connect: ((.connector) + {name: .name})}
+      | select(.connect.state=="FAILED") 
+      | ("/connectors/"+ .connect.name + "/restart")
+    ' <<<"$connectorsjson" |
+      xargs -I{connectors} \
+        curl -v -X POST "$_connect_url"\{connectors\}
+    
     # Restart any connector tasks that are FAILED
-    echo connectorsjson
     jq -erc -M '
       map({name: .status.name } + {tasks: .status.tasks})
       | .[] | {task: ((.tasks[]) + {name: .name})}
