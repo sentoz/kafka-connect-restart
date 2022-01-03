@@ -7,7 +7,7 @@
 
 ## Description
 
-A container that, through the kafka connect API, checks the state of the connector and, if necessary, restarts it.
+A container that, through the kafka connect API, checks the state of the connectors and tasks, if necessary, restarts it.
 
 Supports work in two modes:  
 
@@ -37,9 +37,9 @@ SIDECAR_MODE=false
 ```
 
 <!--
-Title: Kafka Connectors Restarte
+Title: Kafka Connectors Restart
 Description: Restart you connectors in Kafka Connect.
-Author: sentos
+Author: sentoz
 Keywords:
   kafka connect restart
   kafka connectors restart
