@@ -1,12 +1,11 @@
-# Run in kubernetes as a sidecar container
+# Run in kubernetes as a sidecar container<!-- omit in toc -->
 
 Here's how to set up a container to run in sidecar mode.
 
 You can read about sidecar in [doc](https://kubernetes.io/docs/concepts/workloads/pods/#workload-resources-for-managing-pods)
 
-* [Run in kubernetes as a sidecar container](#run-in-kubernetes-as-a-sidecar-container)
-  * [Configuring kafka connect](#configuring-kafka-connect)
-  * [Deploy sidecar](#deploy-sidecar)
+* [Configuring kafka connect](#configuring-kafka-connect)
+* [Deploy sidecar](#deploy-sidecar)
 
 ## Configuring kafka connect
 

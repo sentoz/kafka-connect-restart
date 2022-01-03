@@ -1,12 +1,11 @@
-# Run in kubernetes as a cron job
+# Run in kubernetes as a cron job<!-- omit in toc -->
 
 Here's how to set up a container to run in cron job mode.
 
 You can read about CronJobs in [doc](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
 
-* [Run in kubernetes as a cron job](#run-in-kubernetes-as-a-cron-job)
-  * [Configuring kafka connect](#configuring-kafka-connect)
-  * [Deploy cron job](#deploy-cron-job)
+* [Configuring kafka connect](#configuring-kafka-connect)
+* [Deploy cron job](#deploy-cron-job)
 
 ## Configuring kafka connect
 
