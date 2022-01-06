@@ -56,6 +56,33 @@ get_connectors() {
   curl -Lff "$_connect_url/connectors?expand=status"
 }
 
+parse_failed_connectors() {
+  jq -erc -M '
+    map({name: .status.name} + {connector: .status.connector}) 
+    | .[]| {connect: ((.connector) + {name: .name})}
+    | select(.connect.state=="FAILED") 
+    | ("/connectors/"+ .connect.name + "/restart")
+  '
+}
+
+parse_failed_tasks() {
+  jq -erc -M '
+    map({name: .status.name } + {tasks: .status.tasks})
+    | .[] | {task: ((.tasks[]) + {name: .name})}
+    | select(.task.state=="FAILED") |
+    {name: .task.name, task_id: .task.id|tostring}
+    | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")
+  '
+}
+
+state_connectors_and_tasks() {
+  jq -er -M '
+    map({name: .status.name} + {connector: .status.connector} + {tasks: .status.tasks})
+    | .[]| {connect: ((.connector) + {name: .name})} + {task: ((.tasks[]) + {name: .name})}
+    | ("Connector "+ .connect.name + " state is " + .connect.state + " and tasks state " + .task.state)
+  '
+}
+
 #Set vars
 : "${SIDECAR_MODE:=false}"
 : "${KAFKA_CONNECT_HOST:=localhost}"
@@ -81,41 +108,24 @@ if [ "$SIDECAR_MODE" = true ]; then
 
     if connectorsjson=$(get_connectors); then
       log info 'Status connectors already'
-      log info ':|:Name:|:State_connector:|:State tasks:|:'
-
+      
       # List current connectors and status
       mapfile -t aray_current_states < <(
-        jq -er '
-          . | to_entries[] | [
-            .value.info.type,
-            .key,
-            .value.status.connector.state,
-            .value.status.tasks[].state,
-            .value.info.config."connector.class"
-          ] | join(":|:")
-        ' <<<"$connectorsjson"
+        state_connectors_and_tasks <<<"$connectorsjson"
       )
 
       log info "${aray_current_states[*]}"
 
       # Restart any connectors that are FAILED
-      jq -erc -M '
-        map({name: .status.name} + {connector: .status.connector}) 
-        | .[]| {connect: ((.connector) + {name: .name})}
-        | select(.connect.state=="FAILED") 
-        | ("/connectors/"+ .connect.name + "/restart")
-      ' <<<"$connectorsjson" |
+      parse_failed_connectors <<<"$connectorsjson" |
         xargs -I{connectors} \
           curl -v -X POST "$_connect_url"\{connectors\}
 
+      sleep 10s
+      connectorsjson=$(get_connectors)
+
       # Restart any connector tasks that are FAILED
-      jq -erc -M '
-        map({name: .status.name } + {tasks: .status.tasks})
-        | .[] | {task: ((.tasks[]) + {name: .name})}
-        | select(.task.state=="FAILED") |
-        {name: .task.name, task_id: .task.id|tostring}
-        | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")
-      ' <<<"$connectorsjson" |
+      parse_failed_tasks <<<"$connectorsjson" |
         xargs -I{connector_and_task} \
           curl -v -X POST "$_connect_url"\{connector_and_task\}
 
@@ -133,7 +143,7 @@ if [ "$SIDECAR_MODE" = true ]; then
       log info "${aray_failed_tasks[*]}"
 
     else
-      log fail \
+      log error \
         "Connect to API Kafka Connect $_connect_url failed" \
         "with status code $? and message $connectorsjson"
     fi
@@ -145,29 +155,29 @@ if [ "$SIDECAR_MODE" = true ]; then
 else
 
   if connectorsjson=$(get_connectors); then
+      log info 'Status connectors already'
+      # List current connectors and status
+      mapfile -t aray_current_states < <(
+        state_connectors_and_tasks <<<"$connectorsjson"
+      )
+
+      log info "${aray_current_states[*]}"
+    
     # Restart any connectors that are FAILED
-    jq -erc -M '
-      map({name: .status.name} + {connector: .status.connector}) 
-      | .[]| {connect: ((.connector) + {name: .name})}
-      | select(.connect.state=="FAILED") 
-      | ("/connectors/"+ .connect.name + "/restart")
-    ' <<<"$connectorsjson" |
+    parse_failed_connectors <<<"$connectorsjson" |
       xargs -I{connectors} \
         curl -v -X POST "$_connect_url"\{connectors\}
     
+    sleep 10s
+    connectorsjson=$(get_connectors)
+
     # Restart any connector tasks that are FAILED
-    jq -erc -M '
-      map({name: .status.name } + {tasks: .status.tasks})
-      | .[] | {task: ((.tasks[]) + {name: .name})}
-      | select(.task.state=="FAILED")
-      | {name: .task.name, task_id: .task.id | tostring}
-      | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")
-      ' <<<"$connectorsjson" |
+    parse_failed_tasks <<<"$connectorsjson" |
       xargs -I{connector_and_task} \
         curl -v -X POST "$_connect_url"\{connector_and_task\}
 
   else
-    log fail \
+    log error \
       "Connect to API Kafka Connect $_connect_url failed" \
       "with status code $? and message $connectorsjson"
   fi
