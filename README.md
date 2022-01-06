@@ -24,9 +24,9 @@ Supports work in two modes:
 
 You can pull image from registries:
 
-* `ghcr.io/sentoz/kafka-connect-restart:0.7.0`
-* `quay.io/sentoz/kafka-connect-restart:0.7.0`
-* `docker.io/sentoz/kafka-connect-restart:0.7.0`
+* `ghcr.io/sentoz/kafka-connect-restart:0.7.1`
+* `quay.io/sentoz/kafka-connect-restart:0.7.1`
+* `docker.io/sentoz/kafka-connect-restart:0.7.1`
 ## Dependencies
 
 Required dependencies:
