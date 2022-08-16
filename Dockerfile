@@ -1,4 +1,4 @@
-FROM alpine:3.13
+FROM alpine:3.16
 
 ARG JQ_VERSION="1.6"
 
