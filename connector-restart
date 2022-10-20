@@ -48,8 +48,13 @@ log() {
     "${lvl^^}" "$(date-fmt)" "$msg"
 
   # Exiting the script when an error or success message appears
-  [ "${lvl,,}" == error ] && exit 1
-  [ "${lvl,,}" == success ] && exit 0
+  if [ "${lvl,,}" == error ]; then
+    exit 1
+  fi
+  
+  if [ "${lvl,,}" == success ]; then
+    exit 0
+  fi
 }
 
 get_connectors() {
