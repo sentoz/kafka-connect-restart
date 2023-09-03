@@ -126,7 +126,7 @@ if [ "$SIDECAR_MODE" = true ]; then
 
       # Restart any connectors that are FAILED
       parse_failed_connectors <<<"$connectorsjson" |
-        xargs -I{connectors} \
+        xargs -I"{connectors}" \
           curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
 
       sleep 10s
@@ -134,7 +134,7 @@ if [ "$SIDECAR_MODE" = true ]; then
 
       # Restart any connector tasks that are FAILED
       parse_failed_tasks <<<"$connectorsjson" |
-        xargs -I{connector_and_task} \
+        xargs -I"{connector_and_task}" \
           curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
 
       # log restart connectors
@@ -173,7 +173,7 @@ else
     
     # Restart any connectors that are FAILED
     parse_failed_connectors <<<"$connectorsjson" |
-      xargs -I{connectors} \
+      xargs -I"{connectors}" \
         curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
     
     sleep 10s
@@ -181,7 +181,7 @@ else
 
     # Restart any connector tasks that are FAILED
     parse_failed_tasks <<<"$connectorsjson" |
-      xargs -I{connector_and_task} \
+      xargs -I"{connector_and_task}" \
         curl -v  -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
 
   else
