@@ -30,6 +30,10 @@
                     value: '8083'
                   - name: KAFKA_CONNECT_PROTO
                     value: 'http'
+                  - name: KAFKA_CONNECT_USER
+                    value: ''
+                  - name: KAFKA_CONNECT_PASS
+                    value: ''
                   - name: SIDECAR_MODE
                     value: 'false'
               restartPolicy: OnFailure
