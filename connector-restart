@@ -72,9 +72,9 @@ parse_failed_connectors() {
 
 parse_failed_tasks() {
   jq -erc -M '
-    map({name: .status.name } + {tasks: .status.tasks})
-    | .[] | {task: ((.tasks[]) + {name: .name})}
-    | select(.task.state=="FAILED") |
+    map({name: .status.name } + {tasks: .status.tasks} + {connector: .status.connector})
+    | .[] | {task: ((.tasks[]) + {name: .name}), connector: .connector}
+    | select(.task.state=="FAILED" and .connector.state != "PAUSED") |
     {name: .task.name, task_id: .task.id|tostring}
     | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")
   '
