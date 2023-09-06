@@ -14,6 +14,8 @@ You can pull image from registries:
 
 The image is optimized to use in k8s/okd4 environments. You can simply deploy provided [deployment.yaml](./deploy/deployment.yaml) with `kubectl` (on k8s) or `oc` (on okd):
 
+**Important:** Change [environment](#environment-variables) variables to match your Kafka Connect cluster before deploying.
+
 ```bash
 oc apply -f deploy/deployment.yaml -n {your_namespace_name}
 ```
@@ -24,7 +26,7 @@ kubectl apply -f deploy/deployment.yaml -n {your_namespace_name}
 
 After deploying, it creates 1 pod which run a bash script every 5 minutes. So all failed connectors and tasks will restart.
 
-**Note:** It ignore `PAUSED` connector so it don't restart task of `PAUSED` connectors.
+**Note:** It ignore `PAUSED` connector so it don't restart failed task of `PAUSED` connectors.
 
 ### Environment variables
 
