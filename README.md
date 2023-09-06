@@ -1,62 +1,45 @@
-# Kafka Connectors Restarter <!-- omit in toc -->
+# Connector's Guardian
 
-* [Description](#description)
-* [Quick Start Guides](#quick-start-guides)
-* [Container image](#container-image)
-* [Dependencies](#dependencies)
-* [Environment variables](#environment-variables)
+Guardian you need for your Kafka Connect connectors. It check status of connectors and tasks and restart if they are failed.
 
-## Description
+## How It work
 
-A container that, through the kafka connect API, checks the state of the connectors and tasks, if necessary, restarts it.
-
-Supports work in two modes:  
-
-* cron job
-* sidecar
-
-## Quick Start Guides
-
-* [Run in kubernetes as a cron job](docs/cronjob.md)
-* [Run in kubernetes as a sidecar container](docs/sidecar.md)
+Connector's Guardian interact with Kafka Connect cluster using its [rest api](https://docs.confluent.io/platform/current/connect/references/restapi.html) and parse returned json with [jq](https://github.com/jqlang/jq).
 
 ## Container image
 
 You can pull image from registries:
 
-* `ghcr.io/sentoz/kafka-connect-restart:0.7.1`
-* `quay.io/sentoz/kafka-connect-restart:0.7.1`
-* `docker.io/sentoz/kafka-connect-restart:0.7.1`
+## Usage
 
-## Dependencies
+The image is optimized to use in k8s/okd4 environments. You can simply deploy provided [deployment.yaml](./deploy/deployment.yaml) with `kubectl` (on k8s) or `oc` (on okd):
 
-Required dependencies:
+**Important:** Change [environment](#environment-variables) variables to match your Kafka Connect cluster before deploying.
 
-* [jq](https://github.com/stedolan/jq) - Command-line JSON processor
-* curl - Used to check status connectors in kafka connect api
-
-## Environment variables
-
-```yaml
-KAFKA_CONNECT_HOST=localhost
-KAFKA_CONNECT_PORT=8083
-KAFKA_CONNECT_PROTO=http
-KAFKA_CONNECT_USER=''
-KAFKA_CONNECT_PASS=''
-REQUEST_DELAY=30
-SIDECAR_MODE=false
+```bash
+oc apply -f deploy/deployment.yaml -n {your_namespace_name}
 ```
 
-**Note:**
+```bash
+kubectl apply -f deploy/deployment.yaml -n {your_namespace_name}
+```
 
-* Change `KAFKA_CONNECT_USER` and `KAFKA_CONNECT_PASS` only if Kafka Connect cluster need basic authentication.
+After deploying, it creates 1 pod which run a bash script every 5 minutes. So all failed connectors and tasks will restart.
 
-<!--
-Title: Kafka Connectors Restart
-Description: Restart you connectors in Kafka Connect.
-Author: sentoz
-Keywords:
-  kafka connect restart
-  kafka connectors restart
-  debezium connector restart
--->
+**Note:** It ignore `PAUSED` connector so it don't restart failed task of `PAUSED` connectors.
+
+### Environment variables
+
+In order to use Docker image you need to set some environment variables:
+
+* `KAFKA_CONNECT_HOST`: Default = `localhost`
+* `KAFKA_CONNECT_PORT`: Default = `8083`
+* `KAFKA_CONNECT_PROTO`: Default = `http`
+* `KAFKA_CONNECT_USER`: Default = `''`
+* `KAFKA_CONNECT_PASS`: Default = `''`
+
+**Note:** Set values for `KAFKA_CONNECT_USER` and `KAFKA_CONNECT_PASS` only if Kafka Connect cluster need basic authentication otherwise don't set them.
+
+## To Do
+
+* [] Make Docker Image usable in non ks8 environments.

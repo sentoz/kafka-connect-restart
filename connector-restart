@@ -89,104 +89,43 @@ state_connectors_and_tasks() {
 }
 
 #Set vars
-: "${SIDECAR_MODE:=false}"
 : "${KAFKA_CONNECT_HOST:=localhost}"
 : "${KAFKA_CONNECT_PROTO:=http}"
 : "${KAFKA_CONNECT_PORT:=8083}"
-: "${KAFKA_CONNECT_USER}"
-: "${KAFKA_CONNECT_PASS}"
-: "${REQUEST_DELAY:=30}"
+: "${KAFKA_CONNECT_USER:=''}"
+: "${KAFKA_CONNECT_PASS:=''}"
 _connect_url="$KAFKA_CONNECT_PROTO://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"
-_connect_user_pass="$KAFKA_CONNECT_USER:$KAFKA_CONNECT_USER"
+_connect_user_pass="$KAFKA_CONNECT_USER:$KAFKA_CONNECT_PASS"
 
 #Print vars
-log info SIDECAR_MODE="$SIDECAR_MODE"
 log info KAFKA_CONNECT_PROTO="$KAFKA_CONNECT_PROTO"
 log info KAFKA_CONNECT_HOST="$KAFKA_CONNECT_HOST"
 log info KAFKA_CONNECT_PORT="$KAFKA_CONNECT_PORT"
-log info REQUEST_DELAY="$REQUEST_DELAY"
 
-if [ "$SIDECAR_MODE" = true ]; then
-  #wait start kafka-connect
-  log info 'Wait start kafka-connect 60 second'
-  sleep 60s
+if connectorsjson=$(get_connectors); then
+    log info 'Status connectors already'
+    # List current connectors and status
+    mapfile -t aray_current_states < <(
+      state_connectors_and_tasks <<<"$connectorsjson"
+    )
 
-  while true; do
-    log info 'Get status connectors'
+    log info "${aray_current_states[*]}"
+  
+  # Restart any connectors that are FAILED
+  parse_failed_connectors <<<"$connectorsjson" |
+    xargs -I"{connectors}" \
+      curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
+  
+  sleep 10s
+  connectorsjson=$(get_connectors)
 
-    if connectorsjson=$(get_connectors); then
-      log info 'Status connectors already'
-      
-      # List current connectors and status
-      mapfile -t aray_current_states < <(
-        state_connectors_and_tasks <<<"$connectorsjson"
-      )
-
-      log info "${aray_current_states[*]}"
-
-      # Restart any connectors that are FAILED
-      parse_failed_connectors <<<"$connectorsjson" |
-        xargs -I"{connectors}" \
-          curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
-
-      sleep 10s
-      connectorsjson=$(get_connectors)
-
-      # Restart any connector tasks that are FAILED
-      parse_failed_tasks <<<"$connectorsjson" |
-        xargs -I"{connector_and_task}" \
-          curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
-
-      # log restart connectors
-      mapfile -r aray_failed_tasks < <(
-        jq -rc -M '
-          map({name: .status.name } + {tasks: .status.tasks})
-          | .[] | {task: ((.tasks[]) + {name: .name})}
-          | select(.task.state=="FAILED")
-          | {name: .task.name, task_id: .task.id | tostring}
-          | ("Connector: " + .name + " | Tasks: " + .task_id + " - RESTART")
-        ' <<<"$connectorsjson"
-      )
-
-      log info "${aray_failed_tasks[*]}"
-
-    else
-      log error \
-        "Connect to API Kafka Connect $_connect_url failed" \
-        "with status code $? and message $connectorsjson"
-    fi
-
-    log info "Wait next check after $REQUEST_DELAY minut(s)"
-    sleep "$REQUEST_DELAY"m
-  done
+  # Restart any connector tasks that are FAILED
+  parse_failed_tasks <<<"$connectorsjson" |
+    xargs -I"{connector_and_task}" \
+      curl -v  -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
 
 else
-
-  if connectorsjson=$(get_connectors); then
-      log info 'Status connectors already'
-      # List current connectors and status
-      mapfile -t aray_current_states < <(
-        state_connectors_and_tasks <<<"$connectorsjson"
-      )
-
-      log info "${aray_current_states[*]}"
-    
-    # Restart any connectors that are FAILED
-    parse_failed_connectors <<<"$connectorsjson" |
-      xargs -I"{connectors}" \
-        curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
-    
-    sleep 10s
-    connectorsjson=$(get_connectors)
-
-    # Restart any connector tasks that are FAILED
-    parse_failed_tasks <<<"$connectorsjson" |
-      xargs -I"{connector_and_task}" \
-        curl -v  -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
-
-  else
-    log error \
-      "Connect to API Kafka Connect $_connect_url failed" \
-      "with status code $? and message $connectorsjson"
-  fi
+  log error \
+    "Connect to API Kafka Connect $_connect_url failed" \
+    "with status code $? and message $connectorsjson"
 fi
