@@ -41,9 +41,15 @@ Required dependencies:
 KAFKA_CONNECT_HOST=localhost
 KAFKA_CONNECT_PORT=8083
 KAFKA_CONNECT_PROTO=http
+KAFKA_CONNECT_USER=''
+KAFKA_CONNECT_PASS=''
 REQUEST_DELAY=30
 SIDECAR_MODE=false
 ```
+
+**Note:**
+
+* Change `KAFKA_CONNECT_USER` and `KAFKA_CONNECT_PASS` only if Kafka Connect cluster need basic authentication.
 
 <!--
 Title: Kafka Connectors Restart

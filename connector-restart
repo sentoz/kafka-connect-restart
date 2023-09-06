@@ -58,7 +58,7 @@ log() {
 }
 
 get_connectors() {
-  curl -Lff "$_connect_url/connectors?expand=status"
+  curl -u "$_connect_user_pass" -Lff "$_connect_url/connectors?expand=status"
 }
 
 parse_failed_connectors() {
@@ -93,8 +93,11 @@ state_connectors_and_tasks() {
 : "${KAFKA_CONNECT_HOST:=localhost}"
 : "${KAFKA_CONNECT_PROTO:=http}"
 : "${KAFKA_CONNECT_PORT:=8083}"
+: "${KAFKA_CONNECT_USER}"
+: "${KAFKA_CONNECT_PASS}"
 : "${REQUEST_DELAY:=30}"
 _connect_url="$KAFKA_CONNECT_PROTO://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"
+_connect_user_pass="$KAFKA_CONNECT_USER:$KAFKA_CONNECT_USER"
 
 #Print vars
 log info SIDECAR_MODE="$SIDECAR_MODE"
@@ -123,16 +126,16 @@ if [ "$SIDECAR_MODE" = true ]; then
 
       # Restart any connectors that are FAILED
       parse_failed_connectors <<<"$connectorsjson" |
-        xargs -I{connectors} \
-          curl -v -X POST "$_connect_url"\{connectors\}
+        xargs -I"{connectors}" \
+          curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
 
       sleep 10s
       connectorsjson=$(get_connectors)
 
       # Restart any connector tasks that are FAILED
       parse_failed_tasks <<<"$connectorsjson" |
-        xargs -I{connector_and_task} \
-          curl -v -X POST "$_connect_url"\{connector_and_task\}
+        xargs -I"{connector_and_task}" \
+          curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
 
       # log restart connectors
       mapfile -r aray_failed_tasks < <(
@@ -170,16 +173,16 @@ else
     
     # Restart any connectors that are FAILED
     parse_failed_connectors <<<"$connectorsjson" |
-      xargs -I{connectors} \
-        curl -v -X POST "$_connect_url"\{connectors\}
+      xargs -I"{connectors}" \
+        curl -v -u "$_connect_user_pass" -X POST "$_connect_url"\{connectors\}
     
     sleep 10s
     connectorsjson=$(get_connectors)
 
     # Restart any connector tasks that are FAILED
     parse_failed_tasks <<<"$connectorsjson" |
-      xargs -I{connector_and_task} \
-        curl -v -X POST "$_connect_url"\{connector_and_task\}
+      xargs -I"{connector_and_task}" \
+        curl -v  -u "$_connect_user_pass" -X POST "$_connect_url"\{connector_and_task\}
 
   else
     log error \

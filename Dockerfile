@@ -7,7 +7,10 @@ LABEL maintainer="sentoz66@gmail.com"
 ENV SIDECAR_MODE=false
 ENV KAFKA_CONNECT_HOST=localhost
 ENV KAFKA_CONNECT_PORT=8083
+ENV KAFKA_CONNECT_USER=""
+ENV KAFKA_CONNECT_PASS=""
 ENV REQUEST_DELAY=30
+
 
 RUN apk add --update --no-cache \
     bash curl util-linux && \
