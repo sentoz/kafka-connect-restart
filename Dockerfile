@@ -1,23 +1,10 @@
-FROM alpine:3.16
+ARG ALPINE_VERSION=3.16
 
-ARG JQ_VERSION="1.6"
+FROM alpine:${ALPINE_VERSION}
 
-LABEL maintainer="sentoz66@gmail.com"
-
-ENV SIDECAR_MODE=false
-ENV KAFKA_CONNECT_HOST=localhost
-ENV KAFKA_CONNECT_PORT=8083
-ENV KAFKA_CONNECT_USER=""
-ENV KAFKA_CONNECT_PASS=""
-ENV REQUEST_DELAY=30
-
+LABEL maintainer="anvaari@proton.me"
 
 RUN apk add --update --no-cache \
-    bash curl util-linux && \
-    curl -sLo /usr/bin/jq \
-    "https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/jq-linux64" && \
-    chmod +x /usr/bin/jq
+    bash curl util-linux jq
 
 COPY ./connector-restart /connector-restart
-
-ENTRYPOINT ["/connector-restart"]
