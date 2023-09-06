@@ -95,7 +95,7 @@ state_connectors_and_tasks() {
 : "${KAFKA_CONNECT_USER}"
 : "${KAFKA_CONNECT_PASS}"
 _connect_url="$KAFKA_CONNECT_PROTO://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"
-_connect_user_pass="$KAFKA_CONNECT_USER:$KAFKA_CONNECT_USER"
+_connect_user_pass="$KAFKA_CONNECT_USER:$KAFKA_CONNECT_PASS"
 
 #Print vars
 log info KAFKA_CONNECT_PROTO="$KAFKA_CONNECT_PROTO"
