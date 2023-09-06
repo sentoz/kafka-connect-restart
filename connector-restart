@@ -92,8 +92,8 @@ state_connectors_and_tasks() {
 : "${KAFKA_CONNECT_HOST:=localhost}"
 : "${KAFKA_CONNECT_PROTO:=http}"
 : "${KAFKA_CONNECT_PORT:=8083}"
-: "${KAFKA_CONNECT_USER}"
-: "${KAFKA_CONNECT_PASS}"
+: "${KAFKA_CONNECT_USER:=''}"
+: "${KAFKA_CONNECT_PASS:=''}"
 _connect_url="$KAFKA_CONNECT_PROTO://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"
 _connect_user_pass="$KAFKA_CONNECT_USER:$KAFKA_CONNECT_PASS"
 
