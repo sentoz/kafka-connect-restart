@@ -9,6 +9,7 @@ ENV KAFKA_CONNECT_HOST=localhost
 ENV KAFKA_CONNECT_PORT=8083
 ENV REQUEST_DELAY=30
 
+# hadolint ignore=DL3018
 RUN apk add --update --no-cache \
     bash curl util-linux && \
     curl -sLo /usr/bin/jq \
