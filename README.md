@@ -5,6 +5,7 @@
 * [Container image](#container-image)
 * [Dependencies](#dependencies)
 * [Environment variables](#environment-variables)
+* [Contributing](#contributing)
 
 ## Description
 
@@ -53,6 +54,16 @@ SIDECAR_MODE=false
 
 > Set values for `KAFKA_CONNECT_USER` and `KAFKA_CONNECT_PASS` only if Kafka
 > Connect cluster need basic authentication otherwise don't set them.
+
+## Contributing
+
+To contribute to [kafka-connect-restart][], refer to [Contributing][]([Ru][]).
+
+<!-- Links -->
+
+[kafka-connect-restart]: https://github.com/sentoz/kafka-connect-restart
+[Contributing]: ./CONTRIBUTING.md
+[Ru]: ./CONTRIBUTING_RU.md
 
 <!--
 Title: Kafka Connectors Restart
