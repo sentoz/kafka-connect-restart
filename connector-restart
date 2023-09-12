@@ -62,7 +62,7 @@ get_connectors() {
 }
 
 parse_failed_connectors() {
-  jq -erc -M '
+  jq -rc -M '
     map({name: .status.name} + {connector: .status.connector})
     | .[]| {connect: ((.connector) + {name: .name})}
     | select(.connect.state=="FAILED")
@@ -71,7 +71,7 @@ parse_failed_connectors() {
 }
 
 parse_failed_tasks() {
-  jq -erc -M '
+  jq -rc -M '
     map({name: .status.name } + {tasks: .status.tasks} + {connector: .status.connector})
     | .[] | {task: ((.tasks[]) + {name: .name}), connector: .connector}
     | select(.task.state=="FAILED" and .connector.state != "PAUSED") |
@@ -81,7 +81,7 @@ parse_failed_tasks() {
 }
 
 state_connectors_and_tasks() {
-  jq -er -M '
+  jq -r -M '
     map({name: .status.name} + {connector: .status.connector} + {tasks: .status.tasks})
     | .[]| {connect: ((.connector) + {name: .name})} + {task: ((.tasks[]) + {name: .name})}
     | ("Connector "+ .connect.name + " state is " + .connect.state + " and tasks state " + .task.state)
@@ -144,7 +144,7 @@ if [ "$SIDECAR_MODE" = true ]; then
 
       # log restart connectors
       mapfile -r aray_failed_tasks < <(
-        jq -erc -M '
+        jq -rc -M '
           map({name: .status.name } + {tasks: .status.tasks} + {connector: .status.connector})
           | .[] | {task: ((.tasks[]) + {name: .name}), connector: .connector}
           | select(.task.state=="FAILED" and .connector.state != "PAUSED")
