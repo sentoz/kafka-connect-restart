@@ -51,21 +51,21 @@ log() {
   if [ "${lvl,,}" == error ]; then
     exit 1
   fi
-  
+
   if [ "${lvl,,}" == success ]; then
     exit 0
   fi
 }
 
 get_connectors() {
-  curl -Lff "$_connect_url/connectors?expand=status"
+  curl -Lff "$_connect_user_pass" "$_connect_url/connectors?expand=status"
 }
 
 parse_failed_connectors() {
   jq -erc -M '
-    map({name: .status.name} + {connector: .status.connector}) 
+    map({name: .status.name} + {connector: .status.connector})
     | .[]| {connect: ((.connector) + {name: .name})}
-    | select(.connect.state=="FAILED") 
+    | select(.connect.state=="FAILED")
     | ("/connectors/"+ .connect.name + "/restart")
   '
 }
@@ -76,7 +76,7 @@ parse_failed_tasks() {
     | .[] | {task: ((.tasks[]) + {name: .name})}
     | select(.task.state=="FAILED") |
     {name: .task.name, task_id: .task.id|tostring}
-    | ("/connectors/"+ .name + "/tasks/" + .task_id + "/restart")
+    | ("/Connectors/"+ .name + "/tasks/" + .task_id + "/restart")
   '
 }
 
@@ -93,8 +93,15 @@ state_connectors_and_tasks() {
 : "${KAFKA_CONNECT_HOST:=localhost}"
 : "${KAFKA_CONNECT_PROTO:=http}"
 : "${KAFKA_CONNECT_PORT:=8083}"
+: "${KAFKA_CONNECT_USER:=}"
+: "${KAFKA_CONNECT_PASS:=}"
 : "${REQUEST_DELAY:=30}"
 _connect_url="$KAFKA_CONNECT_PROTO://$KAFKA_CONNECT_HOST:$KAFKA_CONNECT_PORT"
+: "${_connect_user_pass:=}"
+
+if [ -z "$KAFKA_CONNECT_USER" ] && [ -z "$KAFKA_CONNECT_PASS" ]; then
+  _connect_user_pass="-u $KAFKA_CONNECT_USER:$KAFKA_CONNECT_PASS"
+fi
 
 #Print vars
 log info SIDECAR_MODE="$SIDECAR_MODE"
@@ -113,7 +120,7 @@ if [ "$SIDECAR_MODE" = true ]; then
 
     if connectorsjson=$(get_connectors); then
       log info 'Status connectors already'
-      
+
       # List current connectors and status
       mapfile -t aray_current_states < <(
         state_connectors_and_tasks <<<"$connectorsjson"
@@ -123,16 +130,17 @@ if [ "$SIDECAR_MODE" = true ]; then
 
       # Restart any connectors that are FAILED
       parse_failed_connectors <<<"$connectorsjson" |
-        xargs -I{connectors} \
-          curl -v -X POST "$_connect_url"\{connectors\}
+        xargs -I"{connectors}" \
+          curl -v -X POST "$_connect_user_pass" "$_connect_url"\{connectors\}
 
       sleep 10s
       connectorsjson=$(get_connectors)
 
       # Restart any connector tasks that are FAILED
       parse_failed_tasks <<<"$connectorsjson" |
-        xargs -I{connector_and_task} \
-          curl -v -X POST "$_connect_url"\{connector_and_task\}
+        xargs -I"{connector_and_task}" \
+          curl -v -X POST "$_connect_user_pass" \
+          "$_connect_url"\{connector_and_task\}
 
       # log restart connectors
       mapfile -r aray_failed_tasks < <(
@@ -167,19 +175,19 @@ else
       )
 
       log info "${aray_current_states[*]}"
-    
+
     # Restart any connectors that are FAILED
     parse_failed_connectors <<<"$connectorsjson" |
-      xargs -I{connectors} \
-        curl -v -X POST "$_connect_url"\{connectors\}
-    
+      xargs -I"{connectors}" \
+        curl -v -X POST "$_connect_user_pass" "$_connect_url"\{connectors\}
+
     sleep 10s
     connectorsjson=$(get_connectors)
 
     # Restart any connector tasks that are FAILED
     parse_failed_tasks <<<"$connectorsjson" |
-      xargs -I{connector_and_task} \
-        curl -v -X POST "$_connect_url"\{connector_and_task\}
+      xargs -I"{connector_and_task}" \
+        curl -v -X POST "$_connect_user_pass" "$_connect_url"\{connector_and_task\}
 
   else
     log error \
