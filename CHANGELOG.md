@@ -11,6 +11,7 @@ to [semantic versioning][semver].
 
 * Basic authentication [#7](https://github.com/sentoz/kafka-connect-restart/issues/7)
 * Changelog
+* Ignore `PAUSED` connectors [#8](https://github.com/sentoz/kafka-connect-restart/issues/8)
 
 ## [0.7.2][] `2022-01-06`
 
