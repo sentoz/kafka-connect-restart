@@ -5,6 +5,13 @@ All noticeable changes to this project will be documented in this file.
 The format is based on [changelog][keepachangelog], and this project adheres
 to [semantic versioning][semver].
 
+## [0.8.1][] `2023-09-12`
+
+### Changed
+
+* Bump alpine from 3.16 to 3.18
+* Bump jq from 1.6 to 1.7
+
 ## [0.8.0][] `2023-09-12`
 
 ### Added
@@ -77,6 +84,7 @@ to [semantic versioning][semver].
 
 <!-- Tags -->
 
+[0.8.1]: https://github.com/sentoz/kafka-connect-restart/tree/0.8.1
 [0.8.0]: https://github.com/sentoz/kafka-connect-restart/tree/0.8.0
 [0.7.2]: https://github.com/sentoz/kafka-connect-restart/tree/0.7.2
 [0.7.1]: https://github.com/sentoz/kafka-connect-restart/tree/0.7.1
