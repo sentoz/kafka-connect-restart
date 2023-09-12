@@ -30,7 +30,6 @@ Supports work in two modes:
 You can pull image from registries:
 
 * `ghcr.io/sentoz/kafka-connect-restart:0.8.0`
-* `quay.io/sentoz/kafka-connect-restart:0.8.0`
 * `docker.io/sentoz/kafka-connect-restart:0.8.0`
 
 ## Dependencies
