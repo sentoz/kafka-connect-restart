@@ -14,6 +14,5 @@ Fixes #<issue number>
 
 #### Checklist
 
-- [ ] Tests updated
 - [ ] Documentation added
 - [ ] `CHANGELOG.md` updated - the order of entries should be `[Added]`, `[Changed]`, `[Fixed]`
