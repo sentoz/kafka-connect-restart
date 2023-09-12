@@ -1,6 +1,6 @@
 FROM alpine:3.18
 
-ARG JQ_VERSION="1.6"
+ARG JQ_VERSION="1.7"
 
 LABEL maintainer="sentoz66@gmail.com"
 
