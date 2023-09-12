@@ -13,6 +13,10 @@ to [semantic versioning][semver].
 * Changelog
 * Ignore `PAUSED` connectors [#8](https://github.com/sentoz/kafka-connect-restart/issues/8)
 
+### Fixed
+
+* Exit code 4 when result of jq is empty [#11](https://github.com/sentoz/kafka-connect-restart/issues/11)
+
 ## [0.7.2][] `2022-01-06`
 
 ### Fix
