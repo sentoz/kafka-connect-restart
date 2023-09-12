@@ -145,9 +145,9 @@ if [ "$SIDECAR_MODE" = true ]; then
       # log restart connectors
       mapfile -r aray_failed_tasks < <(
         jq -erc -M '
-          map({name: .status.name } + {tasks: .status.tasks})
-          | .[] | {task: ((.tasks[]) + {name: .name})}
-          | select(.task.state=="FAILED")
+          map({name: .status.name } + {tasks: .status.tasks} + {connector: .status.connector})
+          | .[] | {task: ((.tasks[]) + {name: .name}), connector: .connector}
+          | select(.task.state=="FAILED" and .connector.state != "PAUSED")
           | {name: .task.name, task_id: .task.id | tostring}
           | ("Connector: " + .name + " | Tasks: " + .task_id + " - RESTART")
         ' <<<"$connectorsjson"
@@ -176,7 +176,7 @@ else
 
       log info "${aray_current_states[*]}"
 
-    # Restart any connectors that are FAILED
+    # Restart any connectors that are FAILED and not PAUSED
     parse_failed_connectors <<<"$connectorsjson" |
       xargs -I"{connectors}" \
         curl -v -X POST "$_connect_user_pass" "$_connect_url"\{connectors\}

@@ -11,6 +11,9 @@
 A container that, through the kafka connect API, checks the state of the
 connectors and tasks, if necessary, restarts it.
 
+> It ignore `PAUSED` connector so it don't restart failed task of
+> `PAUSED` connectors.
+
 Supports work in two modes:  
 
 * cron job
